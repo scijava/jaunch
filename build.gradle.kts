@@ -1,5 +1,12 @@
+import org.jetbrains.kotlin.de.undercouch.gradle.tasks.download.Download
+import org.jetbrains.kotlin.gradle.plugin.mpp.Executable
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.konan.target.HostManager.Companion.host
+
+println(host)
 plugins {
     kotlin("multiplatform") version "1.9.20"
+    id("de.undercouch.download") version "5.5.0"
 }
 
 group = "org.scijava"
@@ -34,9 +41,38 @@ kotlin {
             }
         }
     }
+
+    targets.withType<KotlinNativeTarget>().configureEach {
+        binaries.withType<Executable>().configureEach {
+            runTaskProvider?.configure {
+                environment("JAVA_HOME", System.getProperty("java.home"))
+            }
+        }
+    }
+
     sourceSets {
-        val nativeMain by getting
+        val nativeMain by getting {
+            dependencies {
+                implementation("com.squareup.okio:okio:3.6.0")
+            }
+        }
         val nativeTest by getting
+    }
+
+    println(providers.environmentVariable("JAVA_HOME").get())
+}
+
+tasks {
+
+    val downloadFiji by registering(Download::class) {
+        src("https://downloads.imagej.net/fiji/latest/fiji-linux64.zip")
+        dest(layout.buildDirectory.file("fiji.zip").get().asFile)
+    }
+
+    val downloadAndUnzipFiji by registering(Copy::class) {
+        dependsOn(downloadFiji)
+        from(zipTree(downloadFiji))
+        into(layout.buildDirectory)
     }
 }
 

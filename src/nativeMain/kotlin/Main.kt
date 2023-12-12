@@ -1,11 +1,24 @@
-@file:OptIn(ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class, ExperimentalForeignApi::class)
 
 import jaunch.*
 import kotlinx.cinterop.*
+import okio.FileSystem
+import okio.Path
+import okio.Path.Companion.toPath
+import platform.posix.*
+
+val hostFileSystem = FileSystem.SYSTEM
+val Path.exist
+    get() = hostFileSystem.exists(this)
 
 @OptIn(ExperimentalForeignApi::class)
-fun main(vararg args: String) {
-    val libjvmPath = "/usr/lib/jvm/default-java/lib/server/libjvm.so"
+fun main() {
+    val defaultJava = "/usr/lib/jvm/default-java"
+    val libjvmPath = when {
+        defaultJava.toPath().exist -> defaultJava
+        else -> "echo \$JAVA_HOME".execute()
+    } + "/lib/server/libjvm.so"
+    println(libjvmPath)
     val classPath = arrayOf(
         "/home/curtis/Applications/Fiji.app/jars/ahocorasick-0.2.4.jar:",
         "/home/curtis/Applications/Fiji.app/jars/aircompressor-0.21.jar:",
@@ -585,8 +598,8 @@ fun main(vararg args: String) {
     try {
         memScoped {
             val result = launch_java(libjvmPath, jvmArgs.size, jvmArgs.toCValuesRef(this),
-                mainClassName.replace(".", "/"), mainArgs.size, mainArgs.toCValuesRef(this))
-            println(result)
+                                     mainClassName.replace(".", "/"), mainArgs.size, mainArgs.toCValuesRef(this))
+            println("result: $result")
         }
     } finally {
         println("FINALLY")
@@ -604,4 +617,23 @@ fun Array<String>.toCValuesRef(scope: MemScope): CValuesRef<CPointerVar<ByteVar>
     }
     arrayPtr[size] = null
     return arrayPtr.reinterpret()
+}
+
+fun String.execute(trim: Boolean = true, redirectStderr: Boolean = true): String {
+    val commandToExecute = if (redirectStderr) "$this 2>&1" else this
+    val fp = popen(commandToExecute, "r") ?: error("Failed to run command: $this")
+
+    val stdout = buildString {
+        val buffer = ByteArray(4096)
+        while (true) {
+            val input = fgets(buffer.refTo(0), buffer.size, fp) ?: break
+            append(input.toKString())
+        }
+    }
+
+    val status = pclose(fp)
+    if (status != 0)
+        error("Command `$this` failed with status $status${if (redirectStderr) ": $stdout" else ""}")
+
+    return if (trim) stdout.trim() else stdout
 }

@@ -1,0 +1,1 @@
+-I./jaunch -L. -fPIC -fno-stack-protector jaunch/fiji.c -o launch-fiji -ljaunch

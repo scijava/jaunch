@@ -1,7 +1,7 @@
 #include "jaunch.h"
 
 int main() {
-	const char *libjvm = "/usr/lib/jvm/default-java/lib/server/libjvm.so";
+	const char *libjvm = "/usr/lib/jvm/java-11-openjdk-amd64/lib/server/libjvm.so";
 	int jvm_argc = 5;
 	const char *jvm_argv[] = {
 		"-Xmx333m",
