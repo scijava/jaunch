@@ -44,7 +44,7 @@ fun main(args: Array<String>) {
 
     // The set of active hints, for activation of configuration elements.
     // Initially populated with hints for the current operating system and CPU architecture.
-    val hints = mutableSetOf<String>(
+    val hints = mutableSetOf(
         // Kotlin knows these operating systems:
         //   UNKNOWN, MACOSX, IOS, LINUX, WINDOWS, ANDROID, WASM, TVOS, WATCHOS
         "OS:${osName()}",
@@ -113,6 +113,7 @@ fun main(args: Array<String>) {
     // Calculate classpath.
     // TODO: config.classpath
     val fijiDir = getenv("FIJI_HOME") ?: (getenv("HOME") + "/Applications/Fiji.app")
+    println("ciao")
     if (!File(fijiDir).isDirectory) {
         error("No Fiji installation found.")
     }
