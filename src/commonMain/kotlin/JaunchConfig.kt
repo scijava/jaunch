@@ -90,6 +90,6 @@ data class JaunchConfig (
     /** TODO */
     val mainClasses: Array<String>
         get() {
-            return if (mainClass == null) mainClassCandidates else arrayOf(mainClass) + mainClassCandidates
+            return if (mainClass == null) mainClassCandidates else mainClassCandidates + mainClass
         }
 }
