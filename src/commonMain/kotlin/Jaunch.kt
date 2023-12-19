@@ -113,7 +113,6 @@ fun main(args: Array<String>) {
     // Calculate classpath.
     // TODO: config.classpath
     val fijiDir = getenv("FIJI_HOME") ?: (getenv("HOME") + "/Applications/Fiji.app")
-    println("ciao")
     if (!File(fijiDir).isDirectory) {
         error("No Fiji installation found.")
     }
