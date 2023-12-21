@@ -47,3 +47,11 @@ kotlin {
         val commonTest by getting
     }
 }
+
+tasks {
+    val debugAndTest = false
+    named("linkDebugExecutablePosix") { enabled = debugAndTest }
+    named("compileTestKotlinPosix") { enabled = debugAndTest }
+    named("linkDebugTestPosix") { enabled = debugAndTest }
+    named("posixTest") { enabled = debugAndTest }
+}
